@@ -3,8 +3,6 @@ import streamlit as st
 import pandas as pd
 from sklearn.metrics import confusion_matrix
 import matplotlib.pyplot as plt
-import numpy as np
-
 st.set_page_config(page_title="Virufy Dashboard", layout='centered')
 
 results_df = pd.read_csv("results.csv")
@@ -25,7 +23,7 @@ TN = confusion[0][0]
 TP = confusion[1][1]
 FP = confusion[0][1]
 
-chart = st.sidebar.radio('Chart Type',('DataFrame','Bar Chart','Pie Chart'))
+chart = st.sidebar.radio('Chart Type',('Bar Chart','Pie Chart'))
 
 if chart == 'Pie Chart':
     fig, ax = plt.subplots()
@@ -37,13 +35,8 @@ if chart == 'Bar Chart':
     ax.bar(['False Negative' , 'True Negative' , 'True Positive' , 'False Positive'],[FN,TN,TP,FP])
     st.pyplot(fig)
 
-sensitivity = st.subheader("Sensitivity: {}%".format(round(TP/(TP+FN))))
-specificity = st.subheader("Specificity: {}%".format (round(TN/(TN+FP))))
-ppv = st.subheader("PPV: {}%".format (round(TP/(TP+FP))))
-npv = st.subheader("NPV: {}%".format (round(TN/(FN+TN))))
+# st.subheader("False Negative: {}%".format (round(FN/len(pcr_test_result)*100)))
+# st.subheader("True Negative: {}%".format (round(TN/len(pcr_test_result)*100)))
+# st.subheader("True Positive: {}%".format (round(TP/len(pcr_test_result)*100)))
+# st.subheader("False Positive: {}%".format (round(FP/len(pcr_test_result)*100)))
 
-if chart == 'DataFrame':
-    df = pd.DataFrame(index= ["Sensitivity", "Specificity", "PPV", "NPV"],
-       data =  np.random.randn(4, 5),
-        columns=('MODEL %d' % i for i in range(1,6)))
-    st.dataframe(df.style.highlight_max(axis=0))
