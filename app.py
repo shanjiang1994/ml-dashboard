@@ -46,6 +46,14 @@ ppv = (round(TP/(TP+FP)))
 npv = (round(TN/(FN+TN)))
 
 df_index = ["Sensitivity", "Specificity", "PPV", "NPV"]
+
+# def df_acc (ctry):
+    # st.subheader("Results for: {}".format(ctry))
+    # df = pd.DataFrame(index=df_index,
+    #    data =  np.random.randn(4, 5),
+    #     columns=(model_list))
+    # st.dataframe(df.style.highlight_max(axis=0))
+
 if chart == 'Accuracy':
     st.subheader("Results for: {}".format(country_list[0]))
     df = pd.DataFrame(index=df_index,
@@ -71,8 +79,3 @@ if chart == 'Accuracy':
         columns=(model_list))
     st.dataframe(df.style.highlight_max(axis=0))
 
-    st.subheader("Results for: {}".format(country_list[3]))
-    df = pd.DataFrame(index= df_index,
-       data =  np.random.randn(4, 5),
-        columns=(model_list))
-    st.dataframe(df.style.highlight_max(axis=0))
