@@ -15,6 +15,7 @@ country_list = list(results_df.country.unique())
 model_list = ["Model_1", "Model_2", "Model_3", "Model_4", "Model_5"]
 
 country = st.sidebar.selectbox("Country",options=country_list)
+age = st.sidebar.slider("Age Range", 18,80,(18, 80), 1)
 model = st.sidebar.selectbox("Model",options=model_list)
 
 results_df_country = results_df[results_df['country']==country]
