@@ -7,7 +7,14 @@ import numpy as np
 
 
 # Page set-up
-st.set_page_config(page_title="Virufy Dashboard", layout='centered') # page_icon
+st.set_page_config( page_title="Virufy Dashboard", 
+                    layout='centered',
+                    page_icon = 'Virufy_Icon.png'
+                    )
+
+Virufy_Icon = st.image('Virufy_Icon.png')
+
+                    
 st.title("How well do our models predict Covid?") # Mian title
 
 # Data prep
@@ -51,7 +58,7 @@ FP = confusion[0][1]
 fig1, ax1 = plt.subplots()
 ax1.pie([FN,TN,TP,FP], labels= ['False Negative' , 'True Negative' , 'True Positive' , 'False Positive'], autopct='%1.1f%%')
 st.pyplot(fig1)
-
+'''
 # Bar Chart
 fig2, ax2 = plt.subplots()
 ax2.bar(['False Negative' , 'True Negative' , 'True Positive' , 'False Positive'],[FN,TN,TP,FP])
@@ -89,3 +96,4 @@ for i in model_list:
 
 
 st.dataframe(df.style.highlight_max(axis=0))
+'''
