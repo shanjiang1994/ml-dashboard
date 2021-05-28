@@ -24,10 +24,10 @@ df_country = results_df[results_df['country']==country] # By country
 
 
    ## Then by age
-age = st.sidebar.slider("Age Range (5 increment)", 18,80,(df_country.age.min(), df_country.age.max()), 5) # return as int/float/date/time/datetime or tuple of int/float/date/time/datetime
-if type(age) is int:
-    df_country_age = df_country[age] # If the range is limit to one number
-elif type(age) is tuple:
+age = st.sidebar.slider("Age Range (5 increment)", df_country.age.min(),df_country.age.max(),(df_country.age.min(), df_country.age.max()), 5) # return as int/float/date/time/datetime or tuple of int/float/date/time/datetime
+if age[0]==age[1]:
+    df_country_age = df_country[df_country['age']==age[0]] # If the range is limit to one number
+else:
     df_country_age = df_country[(df_country['age']>age[0]) & (df_country['age']<age[1])] # else slicing the df by range of the age 
     
 
@@ -47,75 +47,45 @@ TN = confusion[0][0]
 TP = confusion[1][1]
 FP = confusion[0][1]
 
-
-fig, ax = plt.subplots()
-ax.pie([FN,TN,TP,FP], labels= ['False Negative' , 'True Negative' , 'True Positive' , 'False Positive'], autopct='%1.1f%%')
-
-st.pyplot(fig)
-'''
-
-# if chart == 'Bar Chart':
-# country = st.sidebar.selectbox("Country",options=country_list)
-# model = st.sidebar.selectbox("Model",options=model_list)
-# # age = st.sidebar.slider("Age Range", 18,80,(18, 80), 1)
-# results_df_country = results_df[results_df['country']==country]
-
-# pcr_test_result = results_df_country['pcr_test_result']
-# pcr_test_result_pred = results_df_country[model]
-
-# confusion = confusion_matrix(pcr_test_result, pcr_test_result_pred)
-# FN = confusion[1][0]
-# TN = confusion[0][0]
-# TP = confusion[1][1]
-# FP = confusion[0][1]
-fig1, ax = plt.subplots()
-ax.bar(['False Negative' , 'True Negative' , 'True Positive' , 'False Positive'],[FN,TN,TP,FP])
+# Pie Chart
+fig1, ax1 = plt.subplots()
+ax1.pie([FN,TN,TP,FP], labels= ['False Negative' , 'True Negative' , 'True Positive' , 'False Positive'], autopct='%1.1f%%')
 st.pyplot(fig1)
 
-# sens = (round(TP/(TP+FN)))
-# spec = (round(TN/(TN+FP)))
-# ppv = (round(TP/(TP+FP)))
-# npv = (round(TN/(FN+TN)))
+# Bar Chart
+fig2, ax2 = plt.subplots()
+ax2.bar(['False Negative' , 'True Negative' , 'True Positive' , 'False Positive'],[FN,TN,TP,FP])
+st.pyplot(fig2)
 
-df_index = ["Sensitivity", "Specificity", "PPV", "NPV"]
 
-# def df_acc (ctry):
-    # st.subheader("Results for: {}".format(ctry))
-    # df = pd.DataFrame(index=df_index,
-    #    data =  np.random.randn(4, 5),
-    #     columns=(model_list))
-    # st.dataframe(df.style.highlight_max(axis=0))
 
-# if chart == 'Accuracy':
-# age = st.sidebar.slider("Age Range", 18,80,(18, 80), 1)
 
-st.subheader("Results for: {}".format(country_list[0]))
-df = pd.DataFrame(index=df_index,
-    data =  np.random.randn(4, 5),
-    columns=(model_list))
+
+# DataFrames
+# df_index = ["Sensitivity", "Specificity", "PPV", "NPV"]
+st.subheader(f"Results for: {country}")
+df = pd.DataFrame()
+
+pcr_test_result = df_country_age['pcr_test_result']
+
+for i in model_list:
+    # prediction
+    pred = df_country_age[i]
+    # confusion matrix
+    Matrix = confusion_matrix(pcr_test_result,pred)
+    # FN,TN.TP,FP
+    F_N = Matrix[1][0]
+    T_N = Matrix[0][0]
+    T_P = Matrix[1][1]
+    F_P = Matrix[0][1]
+    #Sensitivity, Specificity, PPV, NPV
+    Sens = (T_P/(T_P+F_N))
+    Spec = (T_N/(T_N+F_P))
+    Ppv = (T_P/(T_P+F_P))
+    Npv = (T_N/(F_N+T_N))
+
+    # Each model assign the Sensitivity, Specificity, PPV, NPV
+    df[i]= pd.Series([Sens,Spec,Ppv,Npv])
+
+
 st.dataframe(df.style.highlight_max(axis=0))
-
-st.subheader("Results for: {}".format(country_list[1]))
-df = pd.DataFrame(index=df_index,
-    data =  np.random.randn(4, 5),
-    columns=(model_list))
-st.dataframe(df.style.highlight_max(axis=0))
-
-st.subheader("Results for: {}".format(country_list[2]))
-df = pd.DataFrame(index= df_index,
-    data =  np.random.randn(4, 5),
-    columns=(model_list))
-st.dataframe(df.style.highlight_max(axis=0))
-
-st.subheader("Results for: {}".format(country_list[3]))
-df = pd.DataFrame(index= df_index,
-    data =  np.random.randn(4, 5),
-    columns=(model_list))
-st.dataframe(df.style.highlight_max(axis=0))
-##################################################
-df = pd.DataFrame(index= df_index,
-    data =  np.random.randn(4, 5),
-    columns=(model_list))
-st.dataframe(df.style.highlight_max(axis=0))
-
-'''
