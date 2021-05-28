@@ -69,7 +69,7 @@ st.pyplot(fig2)
 
 
 # DataFrames
-# df_index = ["Sensitivity", "Specificity", "PPV", "NPV"]
+df_index = ["Sensitivity", "Specificity", "PPV", "NPV"]
 st.subheader(f"Results for: {country}")
 df = pd.DataFrame()
 
@@ -93,6 +93,7 @@ for i in model_list:
 
     # Each model assign the Sensitivity, Specificity, PPV, NPV
     df[i]= pd.Series([Sens,Spec,Ppv,Npv])
+df['indicator'] = df_index
+df = df.set_index('indicator') # Set index
 
-
-st.dataframe(df.style.highlight_max(axis=0))
+st.dataframe(df.style.highlight_max(axis=1)) # Display the dataframe
