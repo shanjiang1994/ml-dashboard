@@ -12,7 +12,7 @@ st.set_page_config( page_title="Virufy Dashboard",
                     page_icon = 'Virufy_Icon.png'
                     )
 
-Virufy_Icon = st.image('Virufy_Icon.png')
+st.image('Virufy_Icon.png')
 
                     
 st.title("How well do our models predict Covid?") # Mian title
