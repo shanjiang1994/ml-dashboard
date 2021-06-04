@@ -35,13 +35,11 @@ else:
     df_country = results_df[results_df['country']==country] # By country
 
 
-<<<<<<< HEAD
-   ## Then by age
-age = st.sidebar.slider("Age Range (5 increment)", 18,80,(18,80),5) #df_country.age.min(),df_country.age.max(),(df_country.age.min(), df_country.age.max()), 5) # return as int/float/date/time/datetime or tuple of int/float/date/time/datetime
-=======
 ## Then by age
-age = st.sidebar.slider("Age Range (5 increment)", df_country.age.min(),df_country.age.max(),(df_country.age.min(), df_country.age.max()), 5) # return as int/float/date/time/datetime or tuple of int/float/date/time/datetime
->>>>>>> 2c52bbb0ad01ee936af25fa309ef57ab7ab8c3b0
+age_min = float(df_country.age.min())
+age_max = float(df_country.age.max())
+
+age = st.sidebar.slider("Age Range (5 increment)", age_min,age_max,value =(age_min,age_max),step = 5.) # return as int/float/date/time/datetime or tuple of int/float/date/time/datetime
 if age[0]==age[1]:
     df_country_age = df_country[df_country['age']==age[0]] # If the range is limit to one number
 else:
@@ -59,7 +57,7 @@ if country == 'All Countries' :
         df_allcountry_age = df_country_age[df_country_age['country']==country_name]
         result = df_allcountry_age.pcr_test_result
         #### for each model within each country: compute the confusion matrix and indicators  
-        for model_name in model_list[:-1]:
+        for model_name in model_list:
            
             pred = df_allcountry_age[model_name]
 
@@ -101,7 +99,7 @@ else:
     pcr_test_result = df_country_age['pcr_test_result']
 
 
-    for i in model_list[:-1]:
+    for i in model_list:
         # prediction
         pred = df_country_age[i]
         # confusion matrix
