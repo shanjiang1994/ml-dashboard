@@ -36,8 +36,6 @@ else:
 
 
 ## Then by age
-# age_min = float(df_country.age.min())
-# age_max = float(df_country.age.max())
 
 age_min = int(df_country.age.min())
 age_max = int(df_country.age.max())
