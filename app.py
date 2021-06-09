@@ -36,10 +36,13 @@ else:
 
 
 ## Then by age
-age_min = float(df_country.age.min())
-age_max = float(df_country.age.max())
+# age_min = float(df_country.age.min())
+# age_max = float(df_country.age.max())
 
-age = st.sidebar.slider("Age Range (5 increment)", age_min,age_max,value =(age_min,age_max),step = 5.) # return as int/float/date/time/datetime or tuple of int/float/date/time/datetime
+age_min = int(df_country.age.min())
+age_max = int(df_country.age.max())
+
+age = st.sidebar.slider("Age Range (5 increment)", age_min,age_max,value =(age_min,age_max),step = 5) # return as int/float/date/time/datetime or tuple of int/float/date/time/datetime
 if age[0]==age[1]:
     df_country_age = df_country[df_country['age']==age[0]] # If the range is limit to one number
 else:
