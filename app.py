@@ -2,6 +2,7 @@
 import streamlit as st
 import pandas as pd
 from sklearn.metrics import confusion_matrix
+from sklearn.metrics import f1_score
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -14,129 +15,138 @@ st.set_page_config( page_title="Virufy Dashboard",
 
 st.image('Virufy_Icon.png')
 
-                    
+                
 st.title("How well do our models predict Covid?") # Mian title
 
 # Data prep
 results_df = pd.read_csv("results.csv") # load data
 country_list = list(results_df.country.unique()) # get the list name of country
 country_list.append('All Countries') # Add 'All' option
-model_list = ["Model_1", "Model_2", "Model_3", "Model_4", "Model_5"] # get the list name of model
- 
+# model_list = ["Ahmed_model", "model_2", "model_3", "model_4", "model_5"] # get the list name of model
+model_list  = list(results_df.columns[5:]) 
 
-# drill-down
+
+country = st.sidebar.selectbox("Country",options=country_list)
+
 
 ## By country
-country = st.sidebar.selectbox("Country",options=country_list)
 
 if country == 'All Countries':
     df_country = results_df # All result
 else:
     df_country = results_df[results_df['country']==country] # By country
 
+Source_list = df_country['source'].unique() # Incase certain source not include all countries
+Source = st.sidebar.selectbox("Source",options=Source_list)
 
-## Then by age
+## Then by Source
 
-age_min = int(df_country.age.min())
-age_max = int(df_country.age.max())
+df_source = df_country[df_country['source']==Source]
 
-age = st.sidebar.slider("Age Range (5 increment)", age_min,age_max,value =(age_min,age_max),step = 5) # return as int/float/date/time/datetime or tuple of int/float/date/time/datetime
-if age[0]==age[1]:
-    df_country_age = df_country[df_country['age']==age[0]] # If the range is limit to one number
-else:
-    df_country_age = df_country[(df_country['age']>age[0]) & (df_country['age']<age[1])] # else slicing the df by range of the age 
-    
+
 
 
 ## If displaying all countires result
 if country == 'All Countries' :
     ### Create dataframes for each country
-    dict_countries={i:pd.DataFrame() for i in country_list[:-1]} 
+    country_list_select = list(df_source.country.unique()) 
+    dict_countries={i:pd.DataFrame() for i in country_list_select} 
 
     ### for each country, cache the pcr_test_result 
     for country_name in dict_countries: 
-        df_allcountry_age = df_country_age[df_country_age['country']==country_name]
-        result = df_allcountry_age.pcr_test_result
+        df_all = df_source[df_source['country']==country_name]
+        result = df_all.pcr_test_result
         #### for each model within each country: compute the confusion matrix and indicators  
         for model_name in model_list:
            
-            pred = df_allcountry_age[model_name]
+            pred = df_all[model_name]
 
-            Matrix = confusion_matrix(result,pred)
+            T_N, F_P, F_N, T_P = confusion_matrix(result,pred).ravel()
 
-            F_N = Matrix[1][0]
-            T_N = Matrix[0][0]
-            T_P = Matrix[1][1]
-            F_P = Matrix[0][1]
-            
             
             Sens = (T_P/(T_P+F_N))
             Spec = (T_N/(T_N+F_P))
             Ppv = (T_P/(T_P+F_P))
             Npv = (T_N/(F_N+T_N))
-            
-            dict_countries[country_name][model_name]= pd.Series([Sens,Spec,Ppv,Npv])
-            
+            F1_Score = f1_score(result, pred)
+            dict_countries[country_name][model_name]= pd.Series([Sens,Spec,Ppv,Npv,F1_Score])
             
             
         ### display the dataframe for each country
-        df_index = ["Sensitivity", "Specificity", "PPV", "NPV"]
+        df_index = ["Sensitivity", "Specificity", "PPV", "NPV","F1_Score"]
         dict_countries[country_name]['Indicator'] = df_index
         dict_countries[country_name] = dict_countries[country_name].set_index('Indicator') # Set index
         st.subheader(f"Model robustness: {country_name}")
         st.dataframe(dict_countries[country_name].style.highlight_max(axis=1))
 
 else:
+
+
     ## Then select by model
+    
     model = st.sidebar.selectbox("Model",options=model_list)
 
-    pcr_test_result_pred = df_country_age[model]
+    pcr_test_result_pred = df_source[model]
+
+    df_model = df_source[df_source.index == df_source[model].index]  # Incase some country or sourcse do not have model predicted
+
+
+
+
+    # Then by age
+
+    age_min = int(df_model.age.min())
+    age_max = int(df_model.age.max())
+
+    
+    if age_min==age_max:
+
+        df_age = df_model # If the age is only one , then hide the age selection bar
+    else:
+        
+        age = st.sidebar.slider("Age Range", age_min,age_max,value =(age_min,age_max),step=5) # return as int/float/date/time/datetime or tuple of int/float/date/time/datetime
+        df_age = df_model[(df_model['age']>age[0]) & (df_model['age']<age[1])] # else slicing the df by range of the age 
+        # Else display country by country
 
     # DataFrames
-
     st.subheader(f"Results for: {country}")
     df = pd.DataFrame()
 
-    pcr_test_result = df_country_age['pcr_test_result']
+    pcr_test_result = df_age['pcr_test_result']
+
 
 
     for i in model_list:
         # prediction
-        pred = df_country_age[i]
+        pred = df_age[i]
         # confusion matrix
-        Matrix = confusion_matrix(pcr_test_result,pred)
-        # FN,TN.TP,FP
-        F_N = Matrix[1][0]
-        T_N = Matrix[0][0]
-        T_P = Matrix[1][1]
-        F_P = Matrix[0][1]
+        T_N, F_P, F_N, T_P = confusion_matrix(pcr_test_result,pred).ravel()
+
+            
+
         #Sensitivity, Specificity, PPV, NPV
         Sens = (T_P/(T_P+F_N))
         Spec = (T_N/(T_N+F_P))
         Ppv = (T_P/(T_P+F_P))
         Npv = (T_N/(F_N+T_N))
+        F1_Score = f1_score(pcr_test_result, pred)
+        
 
-        # Each model assign the Sensitivity, Specificity, PPV, NPV
-        df[i]= pd.Series([Sens,Spec,Ppv,Npv])
+        # Each model assign the Sensitivity, Specificity, PPV, NPV, F1_Score
+        df[i]= pd.Series([Sens,Spec,Ppv,Npv,F1_Score])
 
-    df_index = ["Sensitivity", "Specificity", "PPV", "NPV"]
+    df_index = ["Sensitivity", "Specificity", "PPV", "NPV", "F1_Score"]
     df['indicator'] = df_index
     df = df.set_index('indicator') # Set index
 
     st.dataframe(df.style.highlight_max(axis=1)) # Display the dataframe
 
 
-
-
+# Pie Chart & Bar Graph
     ## Confusion Matrix
-    pcr_test_result = df_country_age['pcr_test_result']
+    pcr_test_result_pred = df_age[model]
 
-    confusion = confusion_matrix(pcr_test_result, pcr_test_result_pred)
-    FN = confusion[1][0]
-    TN = confusion[0][0]
-    TP = confusion[1][1]
-    FP = confusion[0][1]
-
+    TN,FP,FN,TP = confusion_matrix(pcr_test_result, pcr_test_result_pred).ravel()
 
     # Title
     st.subheader(f"Distribution for: {country}")
@@ -146,7 +156,7 @@ else:
     # Pie Chart
     fig, ax = plt.subplots(1,2,figsize=(10,5))
     ax[0].pie([FN,TN,TP,FP], labels= ['False Negative' , 'True Negative' , 'True Positive' , 'False Positive'], autopct='%1.1f%%')
-
+    
 
 
 
@@ -154,3 +164,5 @@ else:
     ax[1].bar(['False Negative' , 'True Negative' , 'True Positive' , 'False Positive'],[FN,TN,TP,FP])
     ax[1].tick_params(labelsize=8)
     st.pyplot(fig)
+
+    
